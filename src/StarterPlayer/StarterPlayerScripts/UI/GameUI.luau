@@ -51,6 +51,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	Theme.Pad(topBar, 8)
 	topBar.Parent = root
 	local topLayout = Instance.new("UIListLayout")
+	topLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	topLayout.FillDirection = Enum.FillDirection.Horizontal
 	topLayout.Padding = UDim.new(0, 20)
 	topLayout.VerticalAlignment = Enum.VerticalAlignment.Center
@@ -75,6 +76,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	opponentsFrame.BackgroundTransparency = 1
 	opponentsFrame.Parent = root
 	local opponentsLayout = Instance.new("UIListLayout")
+	opponentsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	opponentsLayout.FillDirection = Enum.FillDirection.Horizontal
 	opponentsLayout.Padding = UDim.new(0, 10)
 	opponentsLayout.Parent = opponentsFrame
@@ -93,6 +95,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	Theme.Pad(logFrame, 8)
 	logFrame.Parent = root
 	local logLayout = Instance.new("UIListLayout")
+	logLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	logLayout.Padding = UDim.new(0, 2)
 	logLayout.Parent = logFrame
 	self.logFrame = logFrame
@@ -120,6 +123,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	Theme.Pad(handFrame, 10)
 	handFrame.Parent = root
 	local handLayout = Instance.new("UIListLayout")
+	handLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	handLayout.FillDirection = Enum.FillDirection.Horizontal
 	handLayout.Padding = UDim.new(0, 8)
 	handLayout.Parent = handFrame
@@ -134,6 +138,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	Theme.Pad(actionBar, 10)
 	actionBar.Parent = root
 	local actionLayout = Instance.new("UIListLayout")
+	actionLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	actionLayout.FillDirection = Enum.FillDirection.Horizontal
 	actionLayout.Padding = UDim.new(0, 10)
 	actionLayout.VerticalAlignment = Enum.VerticalAlignment.Center
@@ -167,6 +172,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	targetRow.LayoutOrder = 4
 	targetRow.Parent = actionBar
 	local targetLayout = Instance.new("UIListLayout")
+	targetLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	targetLayout.FillDirection = Enum.FillDirection.Horizontal
 	targetLayout.Padding = UDim.new(0, 6)
 	targetLayout.Parent = targetRow
@@ -199,6 +205,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	self.coupFourreModal = cf
 
 	local cfLayout = Instance.new("UIListLayout")
+	cfLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	cfLayout.Padding = UDim.new(0, 10)
 	cfLayout.Parent = cf
 
@@ -213,6 +220,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	cfButtons.LayoutOrder = 2
 	cfButtons.Parent = cf
 	local cfButtonsLayout = Instance.new("UIListLayout")
+	cfButtonsLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	cfButtonsLayout.FillDirection = Enum.FillDirection.Horizontal
 	cfButtonsLayout.Padding = UDim.new(0, 10)
 	cfButtonsLayout.Parent = cfButtons
@@ -250,6 +258,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	Theme.Pad(overPanel, 18)
 	overPanel.Parent = over
 	local overLayout = Instance.new("UIListLayout")
+	overLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	overLayout.Padding = UDim.new(0, 6)
 	overLayout.Parent = overPanel
 
@@ -267,6 +276,7 @@ function GameUI.new(parent: Instance, localUserId: number, sendAction)
 	scoresFrame.ZIndex = 201
 	scoresFrame.Parent = overPanel
 	local scoresLayout = Instance.new("UIListLayout")
+	scoresLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	scoresLayout.Padding = UDim.new(0, 4)
 	scoresLayout.Parent = scoresFrame
 	self.scoresFrame = scoresFrame
@@ -336,6 +346,7 @@ function GameUI:_buildSafetyRow(parent, player, layoutOrder: number)
 	row.LayoutOrder = layoutOrder
 	row.Parent = parent
 	local layout = Instance.new("UIListLayout")
+	layout.SortOrder = Enum.SortOrder.LayoutOrder
 	layout.FillDirection = Enum.FillDirection.Horizontal
 	layout.Padding = UDim.new(0, 6)
 	layout.Parent = row
@@ -367,6 +378,7 @@ function GameUI:_buildBoardHeader(parent, player, layoutOrder: number, big: bool
 
 	if big then
 		local layout = Instance.new("UIListLayout")
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
 		layout.FillDirection = Enum.FillDirection.Horizontal
 		layout.Padding = UDim.new(0, 10)
 		layout.VerticalAlignment = Enum.VerticalAlignment.Center
@@ -388,6 +400,7 @@ function GameUI:_buildBoardHeader(parent, player, layoutOrder: number, big: bool
 		battleLabel.Parent = header
 	else
 		local layout = Instance.new("UIListLayout")
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
 		layout.Padding = UDim.new(0, 2)
 		layout.Parent = header
 
@@ -450,6 +463,7 @@ function GameUI:Update(state)
 			Theme.Pad(card, 8)
 			card.Parent = self.opponentsFrame
 			local layout = Instance.new("UIListLayout")
+			layout.SortOrder = Enum.SortOrder.LayoutOrder
 			layout.Padding = UDim.new(0, 4)
 			layout.Parent = card
 			self:_buildBoardHeader(card, p, 1, false)
@@ -475,6 +489,7 @@ function GameUI:Update(state)
 	-- My board
 	clearChildren(self.myBoard)
 	local myLayout = Instance.new("UIListLayout")
+	myLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	myLayout.Padding = UDim.new(0, 6)
 	myLayout.Parent = self.myBoard
 	self:_buildBoardHeader(self.myBoard, localPlayer, 1, true)
@@ -585,6 +600,7 @@ function GameUI:ShowGameOver(payload)
 		row.LayoutOrder = i
 		row.Parent = self.scoresFrame
 		local layout = Instance.new("UIListLayout")
+		layout.SortOrder = Enum.SortOrder.LayoutOrder
 		layout.FillDirection = Enum.FillDirection.Horizontal
 		layout.Padding = UDim.new(0, 10)
 		layout.Parent = row

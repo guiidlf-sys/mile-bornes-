@@ -44,6 +44,7 @@ function LobbyUI.new(parent: Instance, sendAction)
 	panel.Parent = root
 
 	local list = Instance.new("UIListLayout")
+	list.SortOrder = Enum.SortOrder.LayoutOrder
 	list.Padding = UDim.new(0, 6)
 	list.Parent = panel
 
@@ -57,6 +58,7 @@ function LobbyUI.new(parent: Instance, sendAction)
 	playerListFrame.LayoutOrder = 2
 	playerListFrame.Parent = panel
 	local playerLayout = Instance.new("UIListLayout")
+	playerLayout.SortOrder = Enum.SortOrder.LayoutOrder
 	playerLayout.Padding = UDim.new(0, 4)
 	playerLayout.Parent = playerListFrame
 	self.playerListFrame = playerListFrame
