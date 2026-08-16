@@ -5,6 +5,7 @@
 -- after). Pure decoration/atmosphere — actual gameplay happens through the UI.
 
 local Workspace = game:GetService("Workspace")
+local Lighting = game:GetService("Lighting")
 
 local MapBuilder = {}
 
@@ -37,7 +38,7 @@ local function buildBorne(parent: Instance, position: Vector3, label: string?)
 		Color = Color3.fromRGB(240, 240, 235),
 	})
 
-	local cap = part({
+	part({
 		Name = "Cap",
 		Parent = model,
 		Shape = Enum.PartType.Cylinder,
@@ -66,10 +67,67 @@ local function buildBorne(parent: Instance, position: Vector3, label: string?)
 	return model
 end
 
+-- A simple stylised tree: brown trunk + a round green canopy.
+local function buildTree(parent: Instance, position: Vector3)
+	local model = Instance.new("Model")
+	model.Name = "Tree"
+	model.Parent = parent
+
+	local trunk = part({
+		Name = "Trunk",
+		Parent = model,
+		Shape = Enum.PartType.Cylinder,
+		Size = Vector3.new(6, 1.3, 1.3),
+		CFrame = CFrame.new(position + Vector3.new(0, 3, 0)) * CFrame.Angles(0, 0, math.rad(90)),
+		Material = Enum.Material.Wood,
+		Color = Color3.fromRGB(84, 58, 36),
+	})
+
+	part({
+		Name = "Canopy",
+		Parent = model,
+		Shape = Enum.PartType.Ball,
+		Size = Vector3.new(7.5, 7.5, 7.5),
+		Position = position + Vector3.new(0, 8.5, 0),
+		Material = Enum.Material.Grass,
+		Color = Color3.fromRGB(56, 110, 48),
+		CanCollide = false,
+	})
+
+	model.PrimaryPart = trunk
+	return model
+end
+
+local function setupLighting()
+	Lighting.ClockTime = 14
+	Lighting.Brightness = 3
+	Lighting.Ambient = Color3.fromRGB(95, 95, 100)
+	Lighting.OutdoorAmbient = Color3.fromRGB(145, 145, 155)
+	Lighting.GlobalShadows = true
+	Lighting.EnvironmentDiffuseScale = 1
+	Lighting.EnvironmentSpecularScale = 1
+
+	local bloom = Instance.new("BloomEffect")
+	bloom.Name = "MilleBornesBloom"
+	bloom.Intensity = 0.4
+	bloom.Size = 24
+	bloom.Threshold = 1.6
+	bloom.Parent = Lighting
+
+	local colorCorrection = Instance.new("ColorCorrectionEffect")
+	colorCorrection.Name = "MilleBornesColor"
+	colorCorrection.Saturation = 0.15
+	colorCorrection.Contrast = 0.05
+	colorCorrection.TintColor = Color3.fromRGB(255, 248, 235)
+	colorCorrection.Parent = Lighting
+end
+
 function MapBuilder.Build()
 	if Workspace:FindFirstChild("MilleBornesMap") then
 		return
 	end
+
+	setupLighting()
 
 	local mapFolder = Instance.new("Folder")
 	mapFolder.Name = "MilleBornesMap"
@@ -210,6 +268,14 @@ function MapBuilder.Build()
 	end
 	buildBorne(mapFolder, Vector3.new(-40, 0, 20), "1000")
 	buildBorne(mapFolder, Vector3.new(40, 0, 20), "1000")
+
+	-- Trees scattered around the plaza, leaving the road corridor clear
+	local treeAngles = { 0, 30, 60, 90, 120, 230, 260, 290, 320, 350 }
+	for _, angleDeg in ipairs(treeAngles) do
+		local angle = math.rad(angleDeg)
+		local radius = 105 + (angleDeg % 47)
+		buildTree(mapFolder, Vector3.new(math.sin(angle) * radius, 0, math.cos(angle) * radius))
+	end
 
 	-- Spawn point at the edge of the plaza, facing the table
 	local spawn = Instance.new("SpawnLocation")

@@ -36,7 +36,7 @@ function LobbyUI.new(parent: Instance, sendAction)
 	subtitle.Parent = root
 
 	local panel = Instance.new("Frame")
-	panel.Size = UDim2.new(0, 420, 0, 320)
+	panel.Size = UDim2.new(0, 420, 0, 380)
 	panel.Position = UDim2.new(0.5, -210, 0, 150)
 	panel.BackgroundColor3 = Theme.Panel
 	Theme.RoundCorner(panel, 14)
@@ -80,6 +80,37 @@ function LobbyUI.new(parent: Instance, sendAction)
 	readyButton.MouseButton1Click:Connect(function()
 		self.sendAction({ action = "ToggleReady" })
 	end)
+
+	local botRow = Instance.new("Frame")
+	botRow.Size = UDim2.new(1, 0, 0, 40)
+	botRow.BackgroundTransparency = 1
+	botRow.LayoutOrder = 5
+	botRow.Parent = panel
+	local botRowLayout = Instance.new("UIListLayout")
+	botRowLayout.SortOrder = Enum.SortOrder.LayoutOrder
+	botRowLayout.FillDirection = Enum.FillDirection.Horizontal
+	botRowLayout.Padding = UDim.new(0, 8)
+	botRowLayout.Parent = botRow
+
+	local addBotButton = Widgets.MakeButton("+ AJOUTER BOT", UDim2.new(0.5, -4, 1, 0))
+	addBotButton.LayoutOrder = 1
+	addBotButton.Parent = botRow
+	addBotButton.MouseButton1Click:Connect(function()
+		self.sendAction({ action = "AddBot" })
+	end)
+
+	local removeBotButton = Widgets.MakeButton("− RETIRER BOT", UDim2.new(0.5, -4, 1, 0))
+	removeBotButton.LayoutOrder = 2
+	removeBotButton.Parent = botRow
+	removeBotButton.MouseButton1Click:Connect(function()
+		self.sendAction({ action = "RemoveBot" })
+	end)
+
+	local hint = Widgets.MakeLabel("Pas assez de joueurs ? Ajoutez des bots pour tester seul.", UDim2.new(1, 0, 0, 18), 12, false)
+	hint.LayoutOrder = 6
+	hint.TextColor3 = Theme.SubText
+	hint.TextXAlignment = Enum.TextXAlignment.Center
+	hint.Parent = panel
 
 	return self
 end

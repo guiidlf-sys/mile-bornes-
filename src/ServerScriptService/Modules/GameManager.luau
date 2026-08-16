@@ -20,6 +20,11 @@ local lobbyReady: { [number]: boolean } = {}
 local lobbyOrder: { number } = {}
 local currentMatch = nil
 
+-- Bots use negative synthetic IDs so they never collide with a real Roblox
+-- UserId, letting one person fill an otherwise-empty lobby to test a match.
+local botNames: { [number]: string } = {}
+local nextBotId = -1
+
 local countdownEndsAt: number? = nil
 local countdownToken = 0
 
@@ -30,6 +35,9 @@ local startMatch
 local checkStartConditions
 
 local function playerName(userId: number): string
+	if botNames[userId] then
+		return botNames[userId]
+	end
 	local plr = Players:GetPlayerByUserId(userId)
 	return plr and plr.Name or "Joueur"
 end
@@ -96,7 +104,7 @@ startMatch = function()
 
 	local entries = {}
 	for _, uid in ipairs(selected) do
-		table.insert(entries, { userId = uid, name = playerName(uid) })
+		table.insert(entries, { userId = uid, name = playerName(uid), isBot = uid < 0 })
 	end
 
 	local function onBroadcast(match, whisperUserId: number?, whisperMessage: string?)
@@ -117,7 +125,7 @@ startMatch = function()
 			local finished = currentMatch
 			currentMatch = nil
 			for _, p in ipairs(finished.players) do
-				if Players:GetPlayerByUserId(p.userId) then
+				if p.userId < 0 or Players:GetPlayerByUserId(p.userId) then
 					table.insert(lobbyOrder, p.userId)
 					lobbyReady[p.userId] = false
 				end
@@ -224,6 +232,33 @@ function GameManager.Init()
 				return
 			end
 			lobbyReady[uid] = not lobbyReady[uid]
+			broadcastLobby()
+			checkStartConditions()
+		elseif payload.action == "AddBot" then
+			if currentMatch or #lobbyOrder >= GameConstants.MAX_PLAYERS then
+				return
+			end
+			local botId = nextBotId
+			nextBotId -= 1
+			botNames[botId] = "Bot " .. tostring(-botId)
+			table.insert(lobbyOrder, botId)
+			lobbyReady[botId] = true
+			broadcastLobby()
+			checkStartConditions()
+		elseif payload.action == "RemoveBot" then
+			if currentMatch then
+				return
+			end
+			for i = #lobbyOrder, 1, -1 do
+				local id = lobbyOrder[i]
+				if id < 0 then
+					table.remove(lobbyOrder, i)
+					lobbyReady[id] = nil
+					botNames[id] = nil
+					break
+				end
+			end
+			cancelCountdown()
 			broadcastLobby()
 			checkStartConditions()
 		elseif currentMatch then

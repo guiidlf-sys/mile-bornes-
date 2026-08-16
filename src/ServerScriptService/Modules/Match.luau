@@ -12,10 +12,11 @@ local Shuffle = require(script.Parent:WaitForChild("Shuffle"))
 local Match = {}
 Match.__index = Match
 
-local function newPlayerState(userId: number, name: string)
+local function newPlayerState(userId: number, name: string, isBot: boolean)
 	return {
 		userId = userId,
 		name = name,
+		isBot = isBot,
 		connected = true,
 		hand = {},
 		distancePile = {},
@@ -36,7 +37,7 @@ function Match.new(playerEntries, onBroadcast, onFinished)
 
 	self.players = {}
 	for _, entry in ipairs(playerEntries) do
-		table.insert(self.players, newPlayerState(entry.userId, entry.name))
+		table.insert(self.players, newPlayerState(entry.userId, entry.name, entry.isBot == true))
 	end
 
 	self.turnIndex = 1
@@ -123,6 +124,14 @@ function Match:StartTurn(userId: number)
 	end
 
 	self:Broadcast()
+
+	if player.isBot then
+		task.delay(0.8, function()
+			if self.phase == "InProgress" and self.activeUserId == userId and self.pendingCoupFourre == nil then
+				self:BotTakeTurn(player)
+			end
+		end)
+	end
 end
 
 function Match:HandleEmptyHandPass(player)
@@ -238,6 +247,71 @@ function Match:CanPlayHazard(target, card): (boolean, string?)
 		end
 	end
 	return true
+end
+
+-- ===== Bot AI =====
+-- Simple heuristic, no lookahead: advance if possible, else fix a problem,
+-- else play a held safety, else attack an opponent, else discard.
+
+function Match:BotTakeTurn(player)
+	if self.phase ~= "InProgress" or self.activeUserId ~= player.userId then
+		return
+	end
+	if #player.hand == 0 then
+		return
+	end
+
+	local bestDistance = nil
+	for _, c in ipairs(player.hand) do
+		if c.kind == "Distance" then
+			local ok = self:CanPlayDistance(player, c)
+			if ok and (not bestDistance or c.value > bestDistance.value) then
+				bestDistance = c
+			end
+		end
+	end
+	if bestDistance then
+		self:TryPlayCard(player, bestDistance.id, nil)
+		return
+	end
+
+	for _, c in ipairs(player.hand) do
+		if c.kind == "Remedy" then
+			local ok = self:CanPlayRemedy(player, c)
+			if ok then
+				self:TryPlayCard(player, c.id, nil)
+				return
+			end
+		end
+	end
+
+	for _, c in ipairs(player.hand) do
+		if c.kind == "Safety" and not player.safeties[c.safetyType] then
+			self:TryPlayCard(player, c.id, nil)
+			return
+		end
+	end
+
+	for _, c in ipairs(player.hand) do
+		if c.kind == "Hazard" then
+			local targets = {}
+			for _, opp in ipairs(self.players) do
+				if opp.userId ~= player.userId then
+					local ok = self:CanPlayHazard(opp, c)
+					if ok then
+						table.insert(targets, opp)
+					end
+				end
+			end
+			if #targets > 0 then
+				local target = targets[math.random(1, #targets)]
+				self:TryPlayCard(player, c.id, target.userId)
+				return
+			end
+		end
+	end
+
+	self:TryDiscard(player, player.hand[1].id)
 end
 
 -- ===== Actions =====
@@ -403,6 +477,17 @@ function Match:OpenCoupFourreWindow(targetUserId: number, hazardType)
 	}
 	local token = self.pendingCoupFourre
 	self:Broadcast()
+
+	local target = self:GetPlayer(targetUserId)
+	if target and target.isBot then
+		task.delay(0.8, function()
+			if self.pendingCoupFourre == token then
+				self:ResolveCoupFourreResponse(targetUserId, true)
+			end
+		end)
+		return
+	end
+
 	task.delay(GameConstants.COUP_FOURRE_WINDOW_SECONDS, function()
 		if self.pendingCoupFourre == token then
 			self:ResolveCoupFourreResponse(targetUserId, false)
